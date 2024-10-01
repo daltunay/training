@@ -10,7 +10,11 @@ export LLAMA_DIR=$BASE_DIR/training/llama2_70b_lora/
 export RESOURCES_DIR=$BASE_DIR/resources/
 ```
 
+### Clone repo
+
 ```bash
+cd $BASE_DIR
+git clone https://github.com/mlcommons/training.git
 cd $LLAMA_DIR
 ```
 
