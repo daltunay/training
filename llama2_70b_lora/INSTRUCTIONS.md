@@ -1,20 +1,23 @@
 # LLaMa2 70B LoRa: Reference Implementation
 
-## Initial setup
+## Setup
 
-### Env variables
-
-```bash
-export BASE_DIR=/persistent_storage/daniel/mlperf_benchmarks/
-export LLAMA_DIR=$BASE_DIR/training/llama2_70b_lora/
-export RESOURCES_DIR=$BASE_DIR/resources/
-```
-
-### Clone repo
+### Clone repo, create directories
 
 ```bash
+# Set base directory
+BASE_DIR=/persistent_storage/daniel/mlperf_benchmarks/
 cd $BASE_DIR
+
+# Set resources directory
+RESOURCES_DIR=$BASE_DIR/resources/
+mkdir -p $RESOURCES_DIR/dataset $RESOURCES_DIR/model
+
+# Clone repository
 git clone https://github.com/mlcommons/training.git
+
+# Set LLaMa2 70B LoRa directory
+LLAMA_DIR=$BASE_DIR/training/llama2_70b_lora/
 cd $LLAMA_DIR
 ```
 
@@ -84,8 +87,11 @@ cp configs/default_config.yaml configs/flex_config.yaml
 ## Docker
 
 ```bash
-DOCKER_IMAGE=nvcr.io/nvidia/pytorch:24.01-py3  # README uses 23.09, Dockerfile uses 24.01
+# Set Docker image (README uses 23.09, Dockerfile uses 24.01)
+DOCKER_IMAGE=nvcr.io/nvidia/pytorch:24.01-py3
 docker pull $DOCKER_IMAGE
+
+# Run Docker container
 docker run \
   -it \
   --rm \
