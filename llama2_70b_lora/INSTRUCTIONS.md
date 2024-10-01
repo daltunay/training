@@ -82,7 +82,7 @@ cp configs/default_config.yaml configs/flex_config.yaml
 
 ## Docker
 
-- Some versions (`pytorch` and `flash-attn`) are inconsistent between the [Setup](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/README.md#setup) and the provided [`Dockerfile`](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/Dockerfile). We decide to use latest versions (from `Dockerfile`).
+- Some versions (`pytorch` and `flash-attn`) are inconsistent between the [_Setup_](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/README.md#setup) and the provided [`Dockerfile`](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/Dockerfile). We decide to use latest versions (from `Dockerfile`).
 - The following commands were adapted from [`run_docker.sh`](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/run_docker.sh)
 
 ```bash
@@ -117,12 +117,16 @@ pip install flash-attn==2.4.1 --no-build-isolation  # README uses 2.1.0, Dockerf
 
 ### Dataset
 
+- Size: 107 MB
+
 ```bash
 python3 ./scripts/download_dataset.py --local_dir ./dataset/
 ```
 -> takes ~ 10 seconds
 
 ### Model
+
+- Size: 129 GB
 
 ```bash
 python3 ./scripts/download_model.py --local_dir ./model/
@@ -131,7 +135,7 @@ python3 ./scripts/download_model.py --local_dir ./model/
 
 ## Launch training
 
-- You can use the `flex_config.yaml` file here. All of the other parameters are the original ones (cf. [Llama2-70B on 8 devices](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/README.md#llama2-70b-on-8-devices))
+- You can use the `flex_config.yaml` file here. All of the other parameters are the original ones (cf. [_Llama2-70B on 8 devices_](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/README.md#llama2-70b-on-8-devices))
 
 ```bash
 accelerate launch --config_file ./configs/default_config.yaml ./scripts/train.py \
