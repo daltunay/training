@@ -64,7 +64,8 @@ print(f"Model downloaded to {args.local_dir}")
 ## Docker
 
 ```bash
-docker pull nvcr.io/nvidia/pytorch:23.09-py3
+DOCKER_IMAGE=nvcr.io/nvidia/pytorch:24.01-py3  # README uses 23.09, Dockerfile uses 24.01
+docker pull $DOCKER_IMAGE
 docker run \
   -it \
   --rm \
@@ -75,14 +76,14 @@ docker run \
   --volume $RESOURCES_DIR/model:/root/workspace/model \
   --workdir /root/workspace \
   --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 \
-  nvcr.io/nvidia/pytorch:23.09-py3
+  $DOCKER_IMAGE
 ```
 
 ## Dependencies
 
 ```bash
 pip install -r requirements.txt
-pip install flash-attn==2.1.0 --no-build-isolation
+pip install flash-attn==2.4.1 --no-build-isolation  # README uses 2.1.0, Dockerfile uses 2.4.1
 ```
 
 ## Resources
@@ -107,7 +108,7 @@ python3 ./scripts/download_model.py --local_dir ./model/
 cp configs/default_config.yaml configs/flex_config.yaml
 ```
 
-- Set 2 GPUs instead of 8:
+- (Optional) Change number of GPUs:
 
 ```diff
 @@ -14,7 +14,7 @@ machine_rank: 0
@@ -151,6 +152,6 @@ accelerate launch --config_file ./configs/flex_config.yaml ./scripts/train.py \
   --lora_target_modules "qkv_proj,o_proj"
 ```
 
-OOM error:
+OOM error with `H100 1x2`:
 
 > ```torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 448.00 MiB. GPU 1 has a total capacty of 79.10 GiB of which 364.31 MiB is free. Process 175080 has 1.46 GiB memory in use. Process 175356 has 77.26 GiB memory in use. Of the allocated memory 72.12 GiB is allocated by PyTorch, and 3.78 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF```
