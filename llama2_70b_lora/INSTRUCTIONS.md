@@ -39,7 +39,6 @@ snapshot_download(
     local_dir_use_symlinks=False,
     repo_type="dataset",
 )
-print(f"Dataset downloaded to {args.local_dir}")
 ```
 
 - Create `scripts/download_model.py`:
@@ -58,7 +57,28 @@ snapshot_download(
     local_dir=args.local_dir,
     local_dir_use_symlinks=False,
 )
-print(f"Model downloaded to {args.local_dir}")
+```
+
+### (Optional) Custom config
+
+- Copy `configs/default_config.yaml` into `configs/flex_config.yaml`:
+
+```bash
+cp configs/default_config.yaml configs/flex_config.yaml
+```
+
+- (Example) Change number of GPUs:
+
+```diff
+@@ -14,7 +14,7 @@ machine_rank: 0
+ main_training_function: main
+ mixed_precision: bf16
+ num_machines: 1
+-num_processes: 8
++num_processes: 2
+ rdzv_backend: static
+ same_network: true
+ tpu_env: []
 ```
 
 ## Docker
@@ -100,29 +120,9 @@ python3 ./scripts/download_dataset.py --local_dir ./dataset/
 python3 ./scripts/download_model.py --local_dir ./model/
 ```
 
-## Config
-
-- Copy `configs/default_config.yaml` into `configs/flex_config.yaml`:
-
-```bash
-cp configs/default_config.yaml configs/flex_config.yaml
-```
-
-- (Optional) Change number of GPUs:
-
-```diff
-@@ -14,7 +14,7 @@ machine_rank: 0
- main_training_function: main
- mixed_precision: bf16
- num_machines: 1
--num_processes: 8
-+num_processes: 2
- rdzv_backend: static
- same_network: true
- tpu_env: []
-```
-
 ## Launch training
+
+- You can change the config file as needed
 
 ```bash
 accelerate launch --config_file ./configs/flex_config.yaml ./scripts/train.py \
@@ -151,7 +151,3 @@ accelerate launch --config_file ./configs/flex_config.yaml ./scripts/train.py \
   --seed 1234 \
   --lora_target_modules "qkv_proj,o_proj"
 ```
-
-OOM error with `H100 1x2`:
-
-> ```torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 448.00 MiB. GPU 1 has a total capacty of 79.10 GiB of which 364.31 MiB is free. Process 175080 has 1.46 GiB memory in use. Process 175356 has 77.26 GiB memory in use. Of the allocated memory 72.12 GiB is allocated by PyTorch, and 3.78 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF```
