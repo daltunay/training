@@ -31,7 +31,7 @@ cd $LLAMA_DIR
 
 ### Add Scripts
 
-The following scripts were adapted from MLPerf Training v4.0 Results NVIDIA submission:
+The following scripts were adapted from [MLPerf Training v4.0 Results Oracle submission](https://github.com/mlcommons/training_results_v4.0/tree/main/Oracle/benchmarks/llama2_70b_lora/implementations/BM.GPU.H100.8/scripts), as the instructions from [_Download Data and Model_](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/README.md#download-data-and-model) section was not possible (permission denied).
 
 #### Dataset: `scripts/download_dataset.py`
 
@@ -94,7 +94,7 @@ Example: Change the number of GPUs:
 
 ## Docker Setup
 
-Some versions (`pytorch` and `flash-attn`) are inconsistent between the setup instructions and the provided Dockerfile. We use the latest versions from the Dockerfile.
+Some versions (`pytorch` and `flash-attn`) are inconsistent between the [setup instructions](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/README.md#setup) and the provided [Dockerfile](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/Dockerfile). We use the latest versions from the Dockerfile.
 
 ```bash
 DOCKER_IMAGE=nvcr.io/nvidia/pytorch:24.01-py3  # README uses 23.09, Dockerfile uses 24.01
@@ -175,4 +175,4 @@ accelerate launch --config_file ./configs/default_config.yaml ./scripts/train.py
   --seed 1234 \
   --lora_target_modules "qkv_proj,o_proj"
 ```
-Estimated time: ~2 hours
+Estimated time: ~X hours
