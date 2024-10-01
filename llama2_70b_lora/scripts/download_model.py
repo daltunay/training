@@ -11,4 +11,3 @@ snapshot_download(
     local_dir=args.local_dir,
     local_dir_use_symlinks=False,
 )
-print(f"Model downloaded to {args.local_dir}")

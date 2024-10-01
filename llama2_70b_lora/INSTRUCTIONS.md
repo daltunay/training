@@ -5,27 +5,23 @@
 ### Clone repo, create directories
 
 ```bash
-# Set base directory
-BASE_DIR=/persistent_storage/daniel/mlperf_benchmarks/
+BASE_DIR=/persistent_storage-daniel/daniel/mlperf_benchmarks/  # change to your base directory
 cd $BASE_DIR
 
-# Set resources directory
 RESOURCES_DIR=$BASE_DIR/resources/
 mkdir -p $RESOURCES_DIR/dataset $RESOURCES_DIR/model
 
-# Clone repository
 git clone https://github.com/mlcommons/training.git
 
-# Set LLaMa2 70B LoRa directory
 LLAMA_DIR=$BASE_DIR/training/llama2_70b_lora/
 cd $LLAMA_DIR
 ```
 
 ### Add scripts
 
-The following two scripts were adapted from MLPerf Training v4.0 Results NVIDIA submission ([`download_dataset.py`](https://github.com/mlcommons/training_results_v4.0/blob/main/NVIDIA/benchmarks/llama2_70b_lora/implementations/nemo/scripts/download_dataset.py) and [`download_model.py`](https://github.com/mlcommons/training_results_v4.0/blob/main/NVIDIA/benchmarks/llama2_70b_lora/implementations/nemo/scripts/download_model.py)), as the instructions from [Download Data and Model](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/README.md#download-data-and-model) section was not possible (permission denied).
+- The following two scripts were adapted from MLPerf Training v4.0 Results NVIDIA submission ([`download_dataset.py`](https://github.com/mlcommons/training_results_v4.0/blob/main/NVIDIA/benchmarks/llama2_70b_lora/implementations/nemo/scripts/download_dataset.py) and [`download_model.py`](https://github.com/mlcommons/training_results_v4.0/blob/main/NVIDIA/benchmarks/llama2_70b_lora/implementations/nemo/scripts/download_model.py)), as the instructions from [Download Data and Model](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/README.md#download-data-and-model) section was not possible (permission denied).
 
-- Create `scripts/download_dataset.py`:
+#### Dataset: `scripts/download_dataset.py`:
 
 ```python
 import argparse
@@ -44,7 +40,7 @@ snapshot_download(
 )
 ```
 
-- Create `scripts/download_model.py`:
+#### Model: `scripts/download_model.py`:
 
 ```python
 import argparse
@@ -86,12 +82,13 @@ cp configs/default_config.yaml configs/flex_config.yaml
 
 ## Docker
 
+- Some versions (`pytorch` and `flash-attn`) are inconsistent between the [Setup](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/README.md#setup) and the provided [`Dockerfile`](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/Dockerfile). We decide to use latest versions (from `Dockerfile`).
+- The following commands were adapted from [`run_docker.sh`](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/run_docker.sh)
+
 ```bash
-# Set Docker image (README uses 23.09, Dockerfile uses 24.01)
-DOCKER_IMAGE=nvcr.io/nvidia/pytorch:24.01-py3
+DOCKER_IMAGE=nvcr.io/nvidia/pytorch:24.01-py3  # README uses 23.09, Dockerfile uses 24.01
 docker pull $DOCKER_IMAGE
 
-# Run Docker container
 docker run \
   -it \
   --rm \
@@ -104,13 +101,17 @@ docker run \
   --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 \
   $DOCKER_IMAGE
 ```
+-> takes ~ 5 minutes
 
 ## Dependencies
+
+- The following commands were taken from the [`Dockerfile`](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/Dockerfile#L7-L8).
 
 ```bash
 pip install -r requirements.txt
 pip install flash-attn==2.4.1 --no-build-isolation  # README uses 2.1.0, Dockerfile uses 2.4.1
 ```
+-> takes ~ 1.5 minutes
 
 ## Resources
 
@@ -119,19 +120,21 @@ pip install flash-attn==2.4.1 --no-build-isolation  # README uses 2.1.0, Dockerf
 ```bash
 python3 ./scripts/download_dataset.py --local_dir ./dataset/
 ```
+-> takes ~ 10 seconds
 
 ### Model
 
 ```bash
 python3 ./scripts/download_model.py --local_dir ./model/
 ```
+-> takes ~ 30 minutes
 
 ## Launch training
 
-- You can change the config file as needed
+- You can use the `flex_config.yaml` file here. All of the other parameters are the original ones (cf. [Llama2-70B on 8 devices](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/README.md#llama2-70b-on-8-devices))
 
 ```bash
-accelerate launch --config_file ./configs/flex_config.yaml ./scripts/train.py \
+accelerate launch --config_file ./configs/default_config.yaml ./scripts/train.py \
   --dataset_path "./dataset/data/" \
   --model_path "./model/" \
   --max_seq_len 8192 \
@@ -157,3 +160,4 @@ accelerate launch --config_file ./configs/flex_config.yaml ./scripts/train.py \
   --seed 1234 \
   --lora_target_modules "qkv_proj,o_proj"
 ```
+-> took X seconds

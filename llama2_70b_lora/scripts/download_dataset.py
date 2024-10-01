@@ -12,4 +12,3 @@ snapshot_download(
     local_dir_use_symlinks=False,
     repo_type="dataset",
 )
-print(f"Dataset downloaded to {args.local_dir}")
