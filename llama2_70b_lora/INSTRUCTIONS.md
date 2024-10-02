@@ -6,11 +6,12 @@
     - [Add Scripts](#add-scripts)
     - [Optional: Custom Configuration](#optional-custom-configuration)
 2. [Docker Setup](#docker-setup)
-3. [Install Dependencies](#install-dependencies)
-4. [Download Resources](#download-resources)
+    - [Option 1: Using Dockerfile](#option-1-using-dockerfile)
+    - [Option 2: Manual Docker Setup](#option-2-manual-docker-setup)
+3. [Download Resources](#download-resources)
     - [Dataset](#dataset)
     - [Model](#model)
-5. [Launch Training](#launch-training)
+4. [Launch Training](#launch-training)
 
 ## Setup
 
@@ -94,17 +95,63 @@ Example: Change the number of GPUs:
 
 ## Docker Setup
 
-Some versions (`pytorch` and `flash-attn`) are inconsistent between the [setup instructions](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/README.md#setup) and the provided [Dockerfile](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/Dockerfile). We use the latest versions from the Dockerfile.
+NOTE: Some versions (`pytorch` and `flash-attn`) are inconsistent between the [setup instructions](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/README.md#setup) and the provided original [`Dockerfile`](https://github.com/mlcommons/training/blob/master/llama2_70b_lora/Dockerfile). We choose to use the latest versions.
+
+### Option 1: Using Dockerfile
+
+Create a new `Dockerfile` in `llama2_70b_lora/` with the following content:
+
+```Dockerfile
+FROM nvcr.io/nvidia/pytorch:24.01-py3
+
+WORKDIR /root/workspace
+
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+RUN pip install flash-attn==2.4.1 --no-build-isolation
+
+ENTRYPOINT ["/bin/bash"]
+```
+
+Build the Docker image:
 
 ```bash
-DOCKER_IMAGE=nvcr.io/nvidia/pytorch:24.01-py3  # README uses 23.09, Dockerfile uses 24.01
-docker pull $DOCKER_IMAGE
+docker build -t mlperf-llama-image .
+```
 
+Run the Docker container:
+
+```bash
 docker run \
   -it \
   --rm \
   --gpus all \
-  --name mlperf-llama-reference \
+  --name mlperf-llama-container \
+  --volume $LLAMA_DIR:/root/workspace \
+  --volume $RESOURCES_DIR/dataset:/root/workspace/dataset \
+  --volume $RESOURCES_DIR/model:/root/workspace/model \
+  --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 \
+  mlperf-llama-image
+```
+
+### Option 2: Manual Docker Setup
+
+Pull the Docker image:
+
+```bash
+DOCKER_IMAGE=nvcr.io/nvidia/pytorch:24.01-py3
+docker pull $DOCKER_IMAGE
+```
+
+Run the Docker container:
+
+```bash
+docker run \
+  -it \
+  --rm \
+  --gpus all \
+  --name mlperf-llama-container \
   --volume $LLAMA_DIR:/root/workspace \
   --volume $RESOURCES_DIR/dataset:/root/workspace/dataset \
   --volume $RESOURCES_DIR/model:/root/workspace/model \
@@ -114,13 +161,11 @@ docker run \
 ```
 Estimated time: ~5 minutes
 
-## Install Dependencies
-
 Install the required Python packages:
 
 ```bash
 pip install -r requirements.txt
-pip install flash-attn==2.4.1 --no-build-isolation  # README uses 2.1.0, Dockerfile uses 2.4.1
+pip install flash-attn==2.4.1 --no-build-isolation
 ```
 Estimated time: ~1.5 minutes
 
@@ -128,7 +173,7 @@ Estimated time: ~1.5 minutes
 
 ### Dataset
 
-- Size: 107 MB
+Size: 107 MB
 
 ```bash
 python3 ./scripts/download_dataset.py --local_dir ./dataset/
@@ -137,7 +182,7 @@ Estimated time: ~10 seconds
 
 ### Model
 
-- Size: 129 GB
+Size: 129 GB
 
 ```bash
 python3 ./scripts/download_model.py --local_dir ./model/
@@ -175,4 +220,4 @@ accelerate launch --config_file ./configs/default_config.yaml ./scripts/train.py
   --seed 1234 \
   --lora_target_modules "qkv_proj,o_proj"
 ```
-Estimated time: ~X hours
+Estimated time: ~1 hour
